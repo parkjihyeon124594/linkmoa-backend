@@ -1,5 +1,7 @@
 package com.knu.linkmoa.domain.member.entity;
 
+import com.knu.linkmoa.domain.directory.entity.Directory;
+import jakarta.persistence.*;
 import com.knu.linkmoa.domain.sharepage.entity.MemberSharePage;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -41,6 +43,9 @@ public class Member {
 
     @Column(name = "refresh_token")
     private String refresh;
+
+    @OneToMany(mappedBy ="members" , cascade = CascadeType.ALL)
+    private List<Directory> directories = new ArrayList<>();
 
     @OneToMany(mappedBy = "member")
     List<MemberSharePage> memberSharePages = new ArrayList<>();
