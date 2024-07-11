@@ -4,7 +4,7 @@ import com.knu.linkmoa.domain.site.error.errorcode.SiteErrorCode;
 import lombok.Getter;
 
 @Getter
-public class SiteException {
+public class SiteException extends RuntimeException {
 
     private SiteErrorCode siteErrorCode;
 

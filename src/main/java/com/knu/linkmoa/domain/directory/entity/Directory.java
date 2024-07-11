@@ -8,6 +8,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.DynamicUpdate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,12 +25,13 @@ public class Directory {
     @Column(name="directory_name")
     private String directoryName;
 
+    @OneToMany(mappedBy="directory", cascade = CascadeType.ALL,orphanRemoval = true)
+    private List<Site> sites = new ArrayList<>();
+
+
     @ManyToOne(fetch = FetchType.LAZY,cascade = CascadeType.ALL)
     @JoinColumn(name="member_id")
     private Member member;
-
-    @OneToMany(mappedBy="directory", cascade = CascadeType.ALL,orphanRemoval = true)
-    private List<Site> sites = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY,cascade = CascadeType.ALL)
     @JoinColumn(name="parent_directory_id")
@@ -44,6 +46,7 @@ public class Directory {
         this.directoryName=directoryName;
         this.member =member;
         this.parentDirectory=parentDirectory;
+
     }
     public void setMember(Member member){
         this.member = member;
@@ -62,6 +65,10 @@ public class Directory {
     public void addSite(Site site) {
         sites.add(site);
         site.setDirectory(this);
+    }
+
+    public void updateDirecotryName(String directoryName){
+        this.directoryName=directoryName;
     }
 
 }
