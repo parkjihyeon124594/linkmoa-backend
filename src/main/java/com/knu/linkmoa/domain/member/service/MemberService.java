@@ -7,6 +7,7 @@ import com.knu.linkmoa.domain.member.entity.Member;
 import com.knu.linkmoa.domain.member.error.MemberErrorCode;
 import com.knu.linkmoa.domain.member.repository.MemberRepository;
 import com.knu.linkmoa.global.error.custom.MemberException;
+import com.knu.linkmoa.global.principal.PrincipalDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -86,5 +87,6 @@ public class MemberService {
     public boolean checkDuplicateEmail(String email) {
         return memberRepository.existsByEmail(email);
     }
+
 
 }

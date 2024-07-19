@@ -11,6 +11,7 @@ import com.knu.linkmoa.domain.directory.error.exception.DirectoryException;
 import com.knu.linkmoa.domain.directory.repository.DirectoryRepository;
 import com.knu.linkmoa.domain.member.entity.Member;
 import com.knu.linkmoa.domain.member.repository.MemberRepository;
+import com.knu.linkmoa.domain.member.service.MemberService;
 import com.knu.linkmoa.domain.site.dto.response.SiteResponse;
 import com.knu.linkmoa.global.principal.PrincipalDetails;
 import com.knu.linkmoa.global.spec.ApiResponseSpec;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 
@@ -29,18 +31,19 @@ public class DirectoryService {
 
     private final DirectoryRepository directoryRepository;
     private final MemberRepository memberRepository;
+    private final MemberService memberService;
+
 
 
     @Transactional
-    public ApiDirectoryResponse<Long> saveDirectory(DirectoryCreateDto directoryCreateDto, PrincipalDetails principalDetails, Long parentDirectoryId){
+    public ApiDirectoryResponse<Long> saveDirectory(DirectoryCreateDto directoryCreateDto, PrincipalDetails principalDetails){
 
-        Member member = memberRepository.findByEmail(principalDetails.getEmail()).
-                orElseThrow(()->new UsernameNotFoundException("해당 email에 해당하는 Member가 없습니다"));
+        Member member=memberService.findMemberByEmail(principalDetails.getEmail());
 
         Directory newDirectory ;
 
-        if (parentDirectoryId != 0) {
-            Directory parentDirectory = directoryRepository.findById(parentDirectoryId)
+        if (directoryCreateDto.parentDirectoryid() != 0) {
+            Directory parentDirectory = directoryRepository.findById(directoryCreateDto.parentDirectoryid())
                     .orElseThrow(()->new DirectoryException(DirectoryErrorCode.DIRECTORY_NOT_FOUND_EXCEPTION));
 
             newDirectory =Directory.builder()
@@ -70,14 +73,21 @@ public class DirectoryService {
     }
 
     @Transactional
-    public ApiResponseSpec deleteDirectory(Long directoryId){
+    public ApiResponseSpec deleteDirectory(Long directoryId,PrincipalDetails principalDetails){
         Directory deleteDirectory = directoryRepository.findById(directoryId)
                 .orElseThrow(()->new DirectoryException(DirectoryErrorCode.DIRECTORY_NOT_FOUND_EXCEPTION));
 
-        directoryRepository.delete(deleteDirectory);
+        Member member=memberService.findMemberByEmail(principalDetails.getEmail());
 
-        return new ApiResponseSpec(true,200,"directory 삭제에 성공하였습니다.");
+        if (member.getId().equals(deleteDirectory.getMember().getId())) {
+            directoryRepository.delete(deleteDirectory);
+            return new ApiResponseSpec(true, 200, "Directory 삭제에 성공하였습니다.");
+        } else {
+            return new ApiResponseSpec(false,403,"Directory 삭제 권한이 없습니다.");
+        }
     }
+
+
 
     @Transactional
     public ApiDirectoryResponse<Long> updateDirectory(DirectoryUpdateDto directoryUpdateDto,Long directoryId){
