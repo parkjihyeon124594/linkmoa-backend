@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -23,7 +24,7 @@ public class DirectoryController {
     @PostMapping
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiDirectoryResponse<Long>> createDirectory(
-            @RequestBody DirectoryCreateDto directoryCreateDto,
+            @RequestBody @Validated DirectoryCreateDto directoryCreateDto,
             @AuthenticationPrincipal PrincipalDetails principalDetails
     ) {
         ApiDirectoryResponse<Long> longApiDirectoryResponse = directoryService.saveDirectory(directoryCreateDto, principalDetails);
@@ -46,7 +47,7 @@ public class DirectoryController {
     @PutMapping
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiDirectoryResponse> updateDirectory(
-            @RequestBody DirectoryUpdateDto directoryUpdateDto,
+            @RequestBody @Validated DirectoryUpdateDto directoryUpdateDto,
             @AuthenticationPrincipal PrincipalDetails principalDetails
     ) {
         ApiDirectoryResponse<Long> apiDirectoryResponse = directoryService.updateDirectory(directoryUpdateDto, principalDetails);

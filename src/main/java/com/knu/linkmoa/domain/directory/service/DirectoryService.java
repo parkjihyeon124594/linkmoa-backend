@@ -40,8 +40,8 @@ public class DirectoryService {
 
         Directory newDirectory ;
 
-        if (directoryCreateDto.parentDirectoryid() != 0) {
-            Directory parentDirectory = directoryRepository.findById(directoryCreateDto.parentDirectoryid())
+        if (directoryCreateDto.parentDirectoryId() != 0) {
+            Directory parentDirectory = directoryRepository.findById(directoryCreateDto.parentDirectoryId())
                     .orElseThrow(()->new DirectoryException(DirectoryErrorCode.DIRECTORY_NOT_FOUND_EXCEPTION));
 
             newDirectory =Directory.builder()

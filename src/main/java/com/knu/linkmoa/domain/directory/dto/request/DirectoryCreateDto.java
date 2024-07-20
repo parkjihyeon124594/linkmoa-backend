@@ -1,4 +1,9 @@
 package com.knu.linkmoa.domain.directory.dto.request;
 
-public record DirectoryCreateDto(String directoryName,Long parentDirectoryid) {
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+
+public record DirectoryCreateDto(
+        @NotNull @Size(max=20) String directoryName,
+        Long parentDirectoryId) {
 }
