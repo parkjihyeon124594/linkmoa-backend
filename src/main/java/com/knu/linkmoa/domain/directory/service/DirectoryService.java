@@ -4,7 +4,7 @@ package com.knu.linkmoa.domain.directory.service;
 import com.knu.linkmoa.domain.directory.dto.request.DirectoryCreateDto;
 import com.knu.linkmoa.domain.directory.dto.request.DirectoryUpdateDto;
 import com.knu.linkmoa.domain.directory.dto.response.ApiDirectoryResponse;
-import com.knu.linkmoa.domain.directory.dto.response.DirectoryResponse;
+import com.knu.linkmoa.domain.directory.dto.response.DirectoryGetListResponseDto;
 import com.knu.linkmoa.domain.directory.entity.Directory;
 import com.knu.linkmoa.domain.directory.error.errorcode.DirectoryErrorCode;
 import com.knu.linkmoa.domain.directory.error.exception.DirectoryException;
@@ -16,12 +16,10 @@ import com.knu.linkmoa.domain.site.dto.response.SiteResponse;
 import com.knu.linkmoa.global.principal.PrincipalDetails;
 import com.knu.linkmoa.global.spec.ApiResponseSpec;
 import lombok.AllArgsConstructor;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 
@@ -90,40 +88,62 @@ public class DirectoryService {
 
 
     @Transactional
-    public ApiDirectoryResponse<Long> updateDirectory(DirectoryUpdateDto directoryUpdateDto,Long directoryId){
-        Directory updateDirectory = directoryRepository.findById(directoryId)
+    public ApiDirectoryResponse<Long> updateDirectory(DirectoryUpdateDto directoryUpdateDto,PrincipalDetails principalDetails){
+        Directory updateDirectory = directoryRepository.findById(directoryUpdateDto.directoryId())
                 .orElseThrow(()->new DirectoryException(DirectoryErrorCode.DIRECTORY_NOT_FOUND_EXCEPTION));
 
-        updateDirectory.updateDirecotryName(directoryUpdateDto.directoryName());
+        Member member=memberService.findMemberByEmail(principalDetails.getEmail());
 
-
-        return ApiDirectoryResponse.<Long>builder()
-                .status(true)
-                .code(200)
-                .message("directory 수정에 성공하였습니다.")
-                .data(updateDirectory.getId())
-                .build();
-    }
-
-    public ApiDirectoryResponse<DirectoryResponse> getDirectoryWithSites(Long directoryId){
-        Directory directory = directoryRepository.findById(directoryId)
-                .orElseThrow(()->new DirectoryException(DirectoryErrorCode.DIRECTORY_NOT_FOUND_EXCEPTION));
-
-        DirectoryResponse directoryResponse =convertDirectoryResponse(directory);
-
-        return ApiDirectoryResponse.<DirectoryResponse>builder()
-                .status(true)
-                .code(200)
-                .message("directory 조회에 성공하였습니다.")
-                .data(directoryResponse)
-                .build();
+        if(member.getId().equals(updateDirectory.getMember().getId())){
+            updateDirectory.updateDirecotryName(directoryUpdateDto.directoryName());
+            return ApiDirectoryResponse.<Long>builder()
+                    .status(true)
+                    .code(200)
+                    .message("directory 수정에 성공하였습니다.")
+                    .data(updateDirectory.getId())
+                    .build();
+        }else{
+            return ApiDirectoryResponse.<Long>builder()
+                    .status(false)
+                    .code(403)
+                    .message("directory 수정 권한이 없습니다,")
+                    .data(updateDirectory.getId())
+                    .build();
+        }
 
     }
 
-    public DirectoryResponse convertDirectoryResponse(Directory directory){
+    public ApiDirectoryResponse<DirectoryGetListResponseDto> getDirectoryWithSites(Long directoryId, PrincipalDetails principalDetails){
+        Directory getDirectory = directoryRepository.findById(directoryId)
+                .orElseThrow(()->new DirectoryException(DirectoryErrorCode.DIRECTORY_NOT_FOUND_EXCEPTION));
+
+        DirectoryGetListResponseDto directoryGetListResponseDto = convertDirectoryResponse(getDirectory);
+        Member member=memberService.findMemberByEmail(principalDetails.getEmail());
+
+        if(member.getId().equals(getDirectory.getMember().getId())){
+            return ApiDirectoryResponse.<DirectoryGetListResponseDto>builder()
+                    .status(true)
+                    .code(200)
+                    .message("directory 조회에 성공하였습니다.")
+                    .data(directoryGetListResponseDto)
+                    .build();
+        }
+        else{
+            return ApiDirectoryResponse.<DirectoryGetListResponseDto>builder()
+                    .status(false)
+                    .code(403)
+                    .message("directory 조회 권한이 없습니다.")
+                    .build();
+        }
 
 
-        List<DirectoryResponse> childDirectories = directory.getChildDirectories().stream()
+
+    }
+
+    public DirectoryGetListResponseDto convertDirectoryResponse(Directory directory){
+
+
+        List<DirectoryGetListResponseDto> childDirectories = directory.getChildDirectories().stream()
                 .map(this::convertDirectoryResponse)
                 .collect(Collectors.toList());
 
@@ -155,7 +175,7 @@ public class DirectoryService {
             siteResponseList.add(siteResponse);
         }*/
 
-        return DirectoryResponse.builder()
+        return DirectoryGetListResponseDto.builder()
                 .directoryId(directory.getId())
                 .directoryName(directory.getDirectoryName())
                 .childDirectories(childDirectories)
