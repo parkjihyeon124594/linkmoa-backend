@@ -12,7 +12,6 @@ import org.hibernate.annotations.DynamicUpdate;
 @Entity(name="sites")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-
 public class Site {
 
     @Id
@@ -30,10 +29,15 @@ public class Site {
     @JoinColumn(name="directory_id")
     private Directory directory;
 
+    @Column(name="member_id")
+    private Long memberId;
+
+
     @Builder
-    public Site(String siteName,String siteUrl,Directory directory){
+    public Site(String siteName,String siteUrl,Directory directory,Long memberId){
         this.siteName=siteName;
         this.siteUrl=siteUrl;
+        this.memberId=memberId;
         setDirectory(directory);
     }
 

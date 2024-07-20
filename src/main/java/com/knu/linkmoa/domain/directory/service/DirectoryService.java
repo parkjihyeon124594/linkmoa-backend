@@ -36,7 +36,7 @@ public class DirectoryService {
     @Transactional
     public ApiDirectoryResponse<Long> saveDirectory(DirectoryCreateDto directoryCreateDto, PrincipalDetails principalDetails){
 
-        Member member=memberService.findMemberByEmail(principalDetails.getEmail());
+        Member member = memberService.findMemberByEmail(principalDetails.getEmail());
 
         Directory newDirectory ;
 
@@ -112,6 +112,7 @@ public class DirectoryService {
         }
 
     }
+
 
     public ApiDirectoryResponse<DirectoryGetListResponseDto> getDirectoryWithSites(Long directoryId, PrincipalDetails principalDetails){
         Directory getDirectory = directoryRepository.findById(directoryId)
