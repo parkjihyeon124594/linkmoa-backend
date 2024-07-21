@@ -44,7 +44,7 @@ public class Member {
     @Column(name = "refresh_token")
     private String refresh;
 
-    @OneToMany(mappedBy ="members" , cascade = CascadeType.ALL)
+    @OneToMany(mappedBy ="member" , cascade = CascadeType.ALL)
     private List<Directory> directories = new ArrayList<>();
 
     @OneToMany(mappedBy = "member")

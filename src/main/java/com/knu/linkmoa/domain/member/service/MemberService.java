@@ -28,6 +28,7 @@ public class MemberService {
     private final PasswordEncoder passwordEncoder;
 
 
+
     public TokenResponseDto signUp(SignUpRequestDto signUpRequest) {
 
         Optional<Member> optionalExistingMember = memberRepository.findByEmail(signUpRequest.email());
